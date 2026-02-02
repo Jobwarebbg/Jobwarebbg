@@ -1,4 +1,4 @@
--- [[ JOBWARE V12 - JOKER EDITION ]] --
+-- [[ JOBWARE V12 - JOKER EDITION (FINAL) ]] --
 -- Features: Joker Toggle (Top/Mid), FPS/Game Watermark, Compact Layout
 
 local TweenService = game:GetService("TweenService")
@@ -69,7 +69,7 @@ end
 
 -- [[ MAIN LIB ]] --
 function JobwareLib:CreateWindow(config)
-	local WinName = "Jobware" -- Fest auf Jobware gesetzt
+	local WinName = "Jobware" 
 	
 	if CoreGui:FindFirstChild("JobwareV12") then CoreGui.JobwareV12:Destroy() end
 	
@@ -82,23 +82,23 @@ function JobwareLib:CreateWindow(config)
 	-- [[ 1. JOKER TOGGLE (TOP MID) ]] --
 	local ToggleBtn = Instance.new("TextButton")
 	ToggleBtn.Name = "JokerToggle"
-	ToggleBtn.Size = UDim2.new(0, 35, 0, 35) -- Klein (35px)
-	ToggleBtn.Position = UDim2.new(0.5, 0, 0.05, 0) -- Mitte Oben (5% vom Rand)
-	ToggleBtn.AnchorPoint = Vector2.new(0.5, 0) -- Zentriert
+	ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
+	ToggleBtn.Position = UDim2.new(0.5, 0, 0.05, 0) -- Mitte Oben
+	ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 	ToggleBtn.BackgroundColor3 = Theme.MainBg
-	ToggleBtn.Text = "🃏" -- Joker Emoji
+	ToggleBtn.Text = "🃏"
 	ToggleBtn.TextColor3 = Theme.Text
 	ToggleBtn.TextSize = 20
 	ToggleBtn.Parent = ScreenGui
 	AddCorner(ToggleBtn, 8)
 	AddStroke(ToggleBtn, Theme.Accent, 1.5)
-	MakeDraggable(ToggleBtn, ToggleBtn) -- Man kann ihn verschieben wenn er stört
+	MakeDraggable(ToggleBtn, ToggleBtn)
 
 	-- [[ 2. INFO BAR (WATERMARK) ]] --
 	local InfoBar = Instance.new("Frame")
 	InfoBar.Name = "Watermark"
-	InfoBar.Size = UDim2.new(0, 200, 0, 26) -- Breite passt sich an
-	InfoBar.Position = UDim2.new(0.98, 0, 0.05, 0) -- Oben Rechts
+	InfoBar.Size = UDim2.new(0, 200, 0, 26)
+	InfoBar.Position = UDim2.new(0.98, 0, 0.05, 0)
 	InfoBar.AnchorPoint = Vector2.new(1, 0)
 	InfoBar.BackgroundColor3 = Theme.MainBg
 	InfoBar.Parent = ScreenGui
@@ -115,7 +115,7 @@ function JobwareLib:CreateWindow(config)
 	InfoText.TextXAlignment = Enum.TextXAlignment.Right
 	InfoText.Parent = InfoBar
 
-	-- Game Name Fetching (Async)
+	-- Game Name Fetching
 	local GameName = "Unknown Game"
 	task.spawn(function()
 		local s, info = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
@@ -126,7 +126,7 @@ function JobwareLib:CreateWindow(config)
 	RunService.RenderStepped:Connect(function(deltaTime)
 		local fps = math.floor(1 / deltaTime)
 		InfoText.Text = "Jobware | " .. GameName .. " | FPS: " .. tostring(fps)
-		InfoBar.Size = UDim2.new(0, InfoText.TextBounds.X + 20, 0, 26) -- Auto-Resize
+		InfoBar.Size = UDim2.new(0, InfoText.TextBounds.X + 20, 0, 26)
 	end)
 
 	-- [[ 3. MAIN FRAME ]] --

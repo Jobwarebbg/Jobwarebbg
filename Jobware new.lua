@@ -1,5 +1,4 @@
--- [[ JOBWARE V13 - FINAL COMPLETE EDITION ]] --
--- Features: Joker Toggle, Watermark, Dropdowns, ColorPicker, Compact
+-- [[ JOBWARE V14 - FIXED DROPDOWNS & COMPLETE ]] --
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -71,15 +70,15 @@ end
 function JobwareLib:CreateWindow(config)
 	local WinName = "Jobware"
 	
-	if CoreGui:FindFirstChild("JobwareV13") then CoreGui.JobwareV13:Destroy() end
+	if CoreGui:FindFirstChild("JobwareV14") then CoreGui.JobwareV14:Destroy() end
 	
 	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Name = "JobwareV13"
+	ScreenGui.Name = "JobwareV14"
 	ScreenGui.Parent = CoreGui
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
 
-	-- [[ JOKER TOGGLE ]]
+	-- JOKER TOGGLE
 	local ToggleBtn = Instance.new("TextButton")
 	ToggleBtn.Name = "JokerToggle"
 	ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -94,7 +93,7 @@ function JobwareLib:CreateWindow(config)
 	AddStroke(ToggleBtn, Theme.Accent, 1.5)
 	MakeDraggable(ToggleBtn, ToggleBtn)
 
-	-- [[ WATERMARK ]]
+	-- WATERMARK
 	local InfoBar = Instance.new("Frame")
 	InfoBar.Name = "Watermark"
 	InfoBar.Size = UDim2.new(0, 200, 0, 26)
@@ -126,7 +125,7 @@ function JobwareLib:CreateWindow(config)
 		InfoBar.Size = UDim2.new(0, InfoText.TextBounds.X + 20, 0, 26)
 	end)
 
-	-- [[ MAIN WINDOW ]]
+	-- MAIN FRAME
 	local MainFrame = Instance.new("Frame")
 	MainFrame.Size = UDim2.new(0.85, 0, 0.92, 0)
 	MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -415,96 +414,88 @@ function JobwareLib:CreateWindow(config)
 				UserInputService.InputChanged:Connect(function(i) if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then Update(i) end end)
 			end
 			
-			-- DROPDOWN (NEU!)
+			-- DROPDOWN (FIXED)
 			function Section:AddDropdown(text, list, default, callback)
-				local Dropdown = {}
 				local open = false
 				local selected = default or list[1]
 				
-				local DropFrame = Instance.new("Frame")
-				DropFrame.Size = UDim2.new(0.96, 0, 0, 32)
-				DropFrame.BackgroundColor3 = Theme.ElementBg
-				DropFrame.Parent = Items
-				AddCorner(DropFrame, 3)
-				AddStroke(DropFrame, Theme.Stroke, 1)
+				local Container = Instance.new("Frame")
+				Container.Size = UDim2.new(0.96, 0, 0, 32) -- Standard Höhe
+				Container.BackgroundColor3 = Theme.ElementBg
+				Container.Parent = Items
+				Container.ClipsDescendants = true -- Wichtig für Animation
+				AddCorner(Container, 3)
+				AddStroke(Container, Theme.Stroke, 1)
+				
+				local TopBtn = Instance.new("TextButton")
+				TopBtn.Size = UDim2.new(1, 0, 0, 32)
+				TopBtn.BackgroundTransparency = 1
+				TopBtn.Text = ""
+				TopBtn.Parent = Container
 				
 				local Label = Instance.new("TextLabel")
 				Label.Text = text .. ": " .. selected
-				Label.Size = UDim2.new(1, -25, 1, 0)
+				Label.Size = UDim2.new(1, -25, 0, 32)
 				Label.Position = UDim2.new(0, 8, 0, 0)
 				Label.BackgroundTransparency = 1
 				Label.TextColor3 = Theme.Text
 				Label.Font = Theme.FontItem
 				Label.TextSize = 11
 				Label.TextXAlignment = Enum.TextXAlignment.Left
-				Label.Parent = DropFrame
+				Label.Parent = TopBtn
 				
 				local Arrow = Instance.new("TextLabel")
 				Arrow.Text = "▼"
-				Arrow.Size = UDim2.new(0, 20, 1, 0)
+				Arrow.Size = UDim2.new(0, 20, 0, 32)
 				Arrow.Position = UDim2.new(1, -20, 0, 0)
 				Arrow.BackgroundTransparency = 1
 				Arrow.TextColor3 = Theme.TextDim
 				Arrow.TextSize = 10
-				Arrow.Parent = DropFrame
+				Arrow.Parent = TopBtn
 				
-				local Button = Instance.new("TextButton")
-				Button.Size = UDim2.new(1, 0, 1, 0)
-				Button.BackgroundTransparency = 1
-				Button.Text = ""
-				Button.Parent = DropFrame
-				
-				local ListFrame = Instance.new("Frame")
-				ListFrame.Size = UDim2.new(0.96, 0, 0, 0) -- Start height 0
-				ListFrame.BackgroundColor3 = Theme.ElementBg
-				ListFrame.Visible = false
-				ListFrame.Parent = Items
-				AddCorner(ListFrame, 3)
-				AddStroke(ListFrame, Theme.Stroke, 1)
+				local List = Instance.new("Frame")
+				List.Size = UDim2.new(1, 0, 0, 0)
+				List.Position = UDim2.new(0, 0, 0, 32)
+				List.BackgroundTransparency = 1
+				List.Parent = Container
 				
 				local ListLayout = Instance.new("UIListLayout")
-				ListLayout.Padding = UDim.new(0, 2)
-				ListLayout.Parent = ListFrame
+				ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+				ListLayout.Parent = List
 				
-				Button.MouseButton1Click:Connect(function()
+				local function RefreshList()
+					for _, v in pairs(List:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+					for _, item in pairs(list) do
+						local ItemBtn = Instance.new("TextButton")
+						ItemBtn.Size = UDim2.new(1, 0, 0, 24)
+						ItemBtn.BackgroundColor3 = (item == selected) and Theme.Accent or Theme.ElementBg
+						ItemBtn.BackgroundTransparency = (item == selected) and 0.8 or 1
+						ItemBtn.Text = item
+						ItemBtn.TextColor3 = Theme.Text
+						ItemBtn.Font = Theme.FontItem
+						ItemBtn.TextSize = 11
+						ItemBtn.Parent = List
+						
+						ItemBtn.MouseButton1Click:Connect(function()
+							selected = item
+							Label.Text = text .. ": " .. selected
+							open = false
+							TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(0.96, 0, 0, 32)}):Play()
+							Arrow.Rotation = 0
+							pcall(callback, item)
+						end)
+					end
+				end
+				
+				TopBtn.MouseButton1Click:Connect(function()
 					open = not open
+					RefreshList()
+					local targetHeight = open and (32 + (#list * 24)) or 32
+					TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(0.96, 0, 0, targetHeight)}):Play()
 					Arrow.Rotation = open and 180 or 0
-					ListFrame.Visible = open
-					
-					-- Clear old items
-					for _, v in pairs(ListFrame:GetChildren()) do
-						if v:IsA("TextButton") then v:Destroy() end
-					end
-					
-					if open then
-						for _, item in pairs(list) do
-							local ItemBtn = Instance.new("TextButton")
-							ItemBtn.Size = UDim2.new(1, 0, 0, 24)
-							ItemBtn.BackgroundColor3 = Theme.ElementBg
-							ItemBtn.BackgroundTransparency = 1
-							ItemBtn.Text = item
-							ItemBtn.TextColor3 = (item == selected) and Theme.Accent or Theme.Text
-							ItemBtn.Font = Theme.FontItem
-							ItemBtn.TextSize = 11
-							ItemBtn.Parent = ListFrame
-							
-							ItemBtn.MouseButton1Click:Connect(function()
-								selected = item
-								Label.Text = text .. ": " .. selected
-								open = false
-								ListFrame.Visible = false
-								Arrow.Rotation = 0
-								ListFrame.Size = UDim2.new(0.96, 0, 0, 0)
-								pcall(callback, item)
-							end)
-						end
-						ListFrame.Size = UDim2.new(0.96, 0, 0, #list * 26)
-					else
-						ListFrame.Size = UDim2.new(0.96, 0, 0, 0)
-					end
 				end)
 			end
-
+			
 			return Section
 		end
 		return Tab

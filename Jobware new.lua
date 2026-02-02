@@ -1,25 +1,28 @@
--- [[ JOBWARE V11 - HIGH DENSITY / COMPACT EDITION ]] --
--- Style: Neverlose Dark | Layout: Ultra Compact (More items per screen)
+-- [[ JOBWARE V12 - JOKER EDITION ]] --
+-- Features: Joker Toggle (Top/Mid), FPS/Game Watermark, Compact Layout
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
 
 local JobwareLib = {}
 
 -- [[ THEME: NEVERLOSE DARK ]] --
 local Theme = {
-	MainBg      = Color3.fromRGB(6, 6, 8),         -- Pitch Black
-	SidebarBg   = Color3.fromRGB(11, 11, 15),      -- Dark Sidebar
-	SectionBg   = Color3.fromRGB(18, 18, 22),      -- Section Container
-	ElementBg   = Color3.fromRGB(28, 28, 32),      -- Element Background
-	Accent      = Color3.fromRGB(60, 140, 255),    -- Vivid Blue
-	Text        = Color3.fromRGB(235, 235, 235),   -- White
-	TextDim     = Color3.fromRGB(120, 120, 130),   -- Dim Grey
-	Stroke      = Color3.fromRGB(35, 35, 40),      -- Subtle Borders
+	MainBg      = Color3.fromRGB(6, 6, 8),
+	SidebarBg   = Color3.fromRGB(11, 11, 15),
+	SectionBg   = Color3.fromRGB(18, 18, 22),
+	ElementBg   = Color3.fromRGB(28, 28, 32),
+	Accent      = Color3.fromRGB(60, 140, 255),
+	Text        = Color3.fromRGB(235, 235, 235),
+	TextDim     = Color3.fromRGB(120, 120, 130),
+	Stroke      = Color3.fromRGB(35, 35, 40),
 	Font        = Enum.Font.GothamBold,
-	FontItem    = Enum.Font.GothamMedium,          -- Thinner font for items
-	TextSize    = 11                               -- SMALL TEXT SIZE
+	FontItem    = Enum.Font.GothamMedium,
+	TextSize    = 11
 }
 
 -- [[ UTILS ]] --
@@ -66,33 +69,68 @@ end
 
 -- [[ MAIN LIB ]] --
 function JobwareLib:CreateWindow(config)
-	local WinName = config.Name or "NL"
+	local WinName = "Jobware" -- Fest auf Jobware gesetzt
 	
-	if CoreGui:FindFirstChild("JobwareV11") then CoreGui.JobwareV11:Destroy() end
+	if CoreGui:FindFirstChild("JobwareV12") then CoreGui.JobwareV12:Destroy() end
 	
 	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Name = "JobwareV11"
+	ScreenGui.Name = "JobwareV12"
 	ScreenGui.Parent = CoreGui
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
 
-	-- [[ MOBILE TOGGLE ]]
+	-- [[ 1. JOKER TOGGLE (TOP MID) ]] --
 	local ToggleBtn = Instance.new("TextButton")
-	ToggleBtn.Size = UDim2.new(0, 45, 0, 45) -- Kleinerer Toggle
-	ToggleBtn.Position = UDim2.new(0.02, 0, 0.15, 0)
+	ToggleBtn.Name = "JokerToggle"
+	ToggleBtn.Size = UDim2.new(0, 35, 0, 35) -- Klein (35px)
+	ToggleBtn.Position = UDim2.new(0.5, 0, 0.05, 0) -- Mitte Oben (5% vom Rand)
+	ToggleBtn.AnchorPoint = Vector2.new(0.5, 0) -- Zentriert
 	ToggleBtn.BackgroundColor3 = Theme.MainBg
-	ToggleBtn.Text = "N"
-	ToggleBtn.TextColor3 = Theme.Accent
-	ToggleBtn.Font = Enum.Font.GothamBlack
+	ToggleBtn.Text = "🃏" -- Joker Emoji
+	ToggleBtn.TextColor3 = Theme.Text
 	ToggleBtn.TextSize = 20
 	ToggleBtn.Parent = ScreenGui
-	AddCorner(ToggleBtn, 6)
-	AddStroke(ToggleBtn, Theme.Accent, 1)
-	MakeDraggable(ToggleBtn, ToggleBtn)
+	AddCorner(ToggleBtn, 8)
+	AddStroke(ToggleBtn, Theme.Accent, 1.5)
+	MakeDraggable(ToggleBtn, ToggleBtn) -- Man kann ihn verschieben wenn er stört
 
-	-- [[ MAIN FRAME ]]
+	-- [[ 2. INFO BAR (WATERMARK) ]] --
+	local InfoBar = Instance.new("Frame")
+	InfoBar.Name = "Watermark"
+	InfoBar.Size = UDim2.new(0, 200, 0, 26) -- Breite passt sich an
+	InfoBar.Position = UDim2.new(0.98, 0, 0.05, 0) -- Oben Rechts
+	InfoBar.AnchorPoint = Vector2.new(1, 0)
+	InfoBar.BackgroundColor3 = Theme.MainBg
+	InfoBar.Parent = ScreenGui
+	AddCorner(InfoBar, 4)
+	AddStroke(InfoBar, Theme.Stroke, 1)
+	
+	local InfoText = Instance.new("TextLabel")
+	InfoText.Size = UDim2.new(1, -10, 1, 0)
+	InfoText.Position = UDim2.new(0, 5, 0, 0)
+	InfoText.BackgroundTransparency = 1
+	InfoText.TextColor3 = Theme.Text
+	InfoText.Font = Theme.FontItem
+	InfoText.TextSize = 11
+	InfoText.TextXAlignment = Enum.TextXAlignment.Right
+	InfoText.Parent = InfoBar
+
+	-- Game Name Fetching (Async)
+	local GameName = "Unknown Game"
+	task.spawn(function()
+		local s, info = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
+		if s and info then GameName = info.Name end
+	end)
+
+	-- FPS Loop
+	RunService.RenderStepped:Connect(function(deltaTime)
+		local fps = math.floor(1 / deltaTime)
+		InfoText.Text = "Jobware | " .. GameName .. " | FPS: " .. tostring(fps)
+		InfoBar.Size = UDim2.new(0, InfoText.TextBounds.X + 20, 0, 26) -- Auto-Resize
+	end)
+
+	-- [[ 3. MAIN FRAME ]] --
 	local MainFrame = Instance.new("Frame")
-	-- 85% Breite, 92% Höhe (Hoch, aber nicht randvoll)
 	MainFrame.Size = UDim2.new(0.85, 0, 0.92, 0) 
 	MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -105,9 +143,9 @@ function JobwareLib:CreateWindow(config)
 	
 	ToggleBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 
-	-- [[ SIDEBAR ]]
+	-- Sidebar
 	local Sidebar = Instance.new("Frame")
-	Sidebar.Size = UDim2.new(0.24, 0, 1, 0) -- Schmalere Sidebar (24%)
+	Sidebar.Size = UDim2.new(0.24, 0, 1, 0)
 	Sidebar.BackgroundColor3 = Theme.SidebarBg
 	Sidebar.BorderSizePixel = 0
 	Sidebar.Parent = MainFrame
@@ -119,9 +157,10 @@ function JobwareLib:CreateWindow(config)
 	SidebarLine.BorderSizePixel = 0
 	SidebarLine.Parent = Sidebar
 	
+	-- Header Name
 	local Logo = Instance.new("TextLabel")
-	Logo.Text = WinName:upper()
-	Logo.Size = UDim2.new(1, 0, 0, 40) -- Kleinerer Header (40px)
+	Logo.Text = WinName
+	Logo.Size = UDim2.new(1, 0, 0, 40)
 	Logo.BackgroundTransparency = 1
 	Logo.TextColor3 = Theme.Accent
 	Logo.Font = Enum.Font.GothamBlack
@@ -136,11 +175,11 @@ function JobwareLib:CreateWindow(config)
 	TabScroll.Parent = Sidebar
 	
 	local TabLayout = Instance.new("UIListLayout")
-	TabLayout.Padding = UDim.new(0, 2) -- Sehr enge Tabs (2px Abstand)
+	TabLayout.Padding = UDim.new(0, 2)
 	TabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	TabLayout.Parent = TabScroll
 	
-	-- [[ CONTENT ]]
+	-- Content
 	local Content = Instance.new("Frame")
 	Content.Size = UDim2.new(0.76, 0, 1, 0)
 	Content.Position = UDim2.new(0.24, 0, 0, 0)
@@ -149,7 +188,7 @@ function JobwareLib:CreateWindow(config)
 	Content.Parent = MainFrame
 	
 	local TopLine = Instance.new("Frame")
-	TopLine.Size = UDim2.new(1, 0, 0, 1) -- Dünne Linie (1px)
+	TopLine.Size = UDim2.new(1, 0, 0, 1)
 	TopLine.BackgroundColor3 = Theme.Accent
 	TopLine.BorderSizePixel = 0
 	TopLine.Parent = Content
@@ -169,13 +208,13 @@ function JobwareLib:CreateWindow(config)
 	function Library:CreateTab(name)
 		local Tab = {}
 		local TabBtn = Instance.new("TextButton")
-		TabBtn.Size = UDim2.new(1, 0, 0, 32) -- Sehr kompakte Tabs (32px Höhe)
+		TabBtn.Size = UDim2.new(1, 0, 0, 32)
 		TabBtn.BackgroundColor3 = Theme.SidebarBg
 		TabBtn.BackgroundTransparency = 1
 		TabBtn.Text = name
 		TabBtn.TextColor3 = Theme.TextDim
 		TabBtn.Font = Theme.FontItem
-		TabBtn.TextSize = 11 -- Kleine Schrift
+		TabBtn.TextSize = 11
 		TabBtn.Parent = TabScroll
 		
 		local Ind = Instance.new("Frame")
@@ -194,7 +233,7 @@ function JobwareLib:CreateWindow(config)
 		Page.Parent = PageFolder
 		
 		local PageLayout = Instance.new("UIListLayout")
-		PageLayout.Padding = UDim.new(0, 6) -- Wenig Abstand zwischen Sektionen
+		PageLayout.Padding = UDim.new(0, 6)
 		PageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 		PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		PageLayout.Parent = Page
@@ -239,12 +278,12 @@ function JobwareLib:CreateWindow(config)
 			
 			local SecTitle = Instance.new("TextLabel")
 			SecTitle.Text = title
-			SecTitle.Size = UDim2.new(1, -10, 0, 24) -- Kompakter Header (24px)
+			SecTitle.Size = UDim2.new(1, -10, 0, 24)
 			SecTitle.Position = UDim2.new(0, 8, 0, 0)
 			SecTitle.BackgroundTransparency = 1
 			SecTitle.TextColor3 = Theme.Accent
 			SecTitle.Font = Theme.Font
-			SecTitle.TextSize = 11 -- Kleine Schrift
+			SecTitle.TextSize = 11
 			SecTitle.TextXAlignment = Enum.TextXAlignment.Left
 			SecTitle.Parent = SecFrame
 			
@@ -256,7 +295,7 @@ function JobwareLib:CreateWindow(config)
 			Items.Parent = SecFrame
 			
 			local ItemLayout = Instance.new("UIListLayout")
-			ItemLayout.Padding = UDim.new(0, 4) -- Sehr enger Abstand (4px)
+			ItemLayout.Padding = UDim.new(0, 4)
 			ItemLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 			ItemLayout.Parent = Items
 			
@@ -267,7 +306,7 @@ function JobwareLib:CreateWindow(config)
 			-- [[ COMPACT BUTTON ]]
 			function Section:AddButton(text, callback)
 				local Button = Instance.new("TextButton")
-				Button.Size = UDim2.new(0.96, 0, 0, 28) -- Button Höhe nur 28px!
+				Button.Size = UDim2.new(0.96, 0, 0, 28)
 				Button.BackgroundColor3 = Theme.ElementBg
 				Button.Text = text
 				Button.TextColor3 = Theme.Text
@@ -289,7 +328,7 @@ function JobwareLib:CreateWindow(config)
 			function Section:AddToggle(text, default, callback)
 				local Toggled = default or false
 				local ToggleBtn = Instance.new("TextButton")
-				ToggleBtn.Size = UDim2.new(0.96, 0, 0, 28) -- Toggle Höhe nur 28px!
+				ToggleBtn.Size = UDim2.new(0.96, 0, 0, 28)
 				ToggleBtn.BackgroundColor3 = Theme.ElementBg
 				ToggleBtn.Text = ""
 				ToggleBtn.AutoButtonColor = false
@@ -309,7 +348,7 @@ function JobwareLib:CreateWindow(config)
 				Label.Parent = ToggleBtn
 				
 				local Box = Instance.new("Frame")
-				Box.Size = UDim2.new(0, 14, 0, 14) -- Kleines Kästchen
+				Box.Size = UDim2.new(0, 14, 0, 14)
 				Box.Position = UDim2.new(0.96, -14, 0.5, -7)
 				Box.BackgroundColor3 = Toggled and Theme.Accent or Color3.fromRGB(35,35,40)
 				Box.Parent = ToggleBtn
@@ -327,7 +366,7 @@ function JobwareLib:CreateWindow(config)
 			function Section:AddSlider(text, min, max, default, callback)
 				local val = default or min
 				local SliderFrame = Instance.new("Frame")
-				SliderFrame.Size = UDim2.new(0.96, 0, 0, 38) -- Slider Höhe 38px
+				SliderFrame.Size = UDim2.new(0.96, 0, 0, 38)
 				SliderFrame.BackgroundColor3 = Theme.ElementBg
 				SliderFrame.Parent = Items
 				AddCorner(SliderFrame, 3)

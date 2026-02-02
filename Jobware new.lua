@@ -1,5 +1,5 @@
--- [[ JOBWARE V12 - JOKER EDITION (FINAL) ]] --
--- Features: Joker Toggle (Top/Mid), FPS/Game Watermark, Compact Layout
+-- [[ JOBWARE V13 - FINAL COMPLETE EDITION ]] --
+-- Features: Joker Toggle, Watermark, Dropdowns, ColorPicker, Compact
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -10,7 +10,7 @@ local Players = game:GetService("Players")
 
 local JobwareLib = {}
 
--- [[ THEME: NEVERLOSE DARK ]] --
+-- [[ THEME ]] --
 local Theme = {
 	MainBg      = Color3.fromRGB(6, 6, 8),
 	SidebarBg   = Color3.fromRGB(11, 11, 15),
@@ -69,21 +69,21 @@ end
 
 -- [[ MAIN LIB ]] --
 function JobwareLib:CreateWindow(config)
-	local WinName = "Jobware" 
+	local WinName = "Jobware"
 	
-	if CoreGui:FindFirstChild("JobwareV12") then CoreGui.JobwareV12:Destroy() end
+	if CoreGui:FindFirstChild("JobwareV13") then CoreGui.JobwareV13:Destroy() end
 	
 	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Name = "JobwareV12"
+	ScreenGui.Name = "JobwareV13"
 	ScreenGui.Parent = CoreGui
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
 
-	-- [[ 1. JOKER TOGGLE (TOP MID) ]] --
+	-- [[ JOKER TOGGLE ]]
 	local ToggleBtn = Instance.new("TextButton")
 	ToggleBtn.Name = "JokerToggle"
 	ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
-	ToggleBtn.Position = UDim2.new(0.5, 0, 0.05, 0) -- Mitte Oben
+	ToggleBtn.Position = UDim2.new(0.5, 0, 0.05, 0)
 	ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 	ToggleBtn.BackgroundColor3 = Theme.MainBg
 	ToggleBtn.Text = "🃏"
@@ -94,7 +94,7 @@ function JobwareLib:CreateWindow(config)
 	AddStroke(ToggleBtn, Theme.Accent, 1.5)
 	MakeDraggable(ToggleBtn, ToggleBtn)
 
-	-- [[ 2. INFO BAR (WATERMARK) ]] --
+	-- [[ WATERMARK ]]
 	local InfoBar = Instance.new("Frame")
 	InfoBar.Name = "Watermark"
 	InfoBar.Size = UDim2.new(0, 200, 0, 26)
@@ -115,23 +115,20 @@ function JobwareLib:CreateWindow(config)
 	InfoText.TextXAlignment = Enum.TextXAlignment.Right
 	InfoText.Parent = InfoBar
 
-	-- Game Name Fetching
-	local GameName = "Unknown Game"
+	local GameName = "Game"
 	task.spawn(function()
 		local s, info = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
 		if s and info then GameName = info.Name end
 	end)
 
-	-- FPS Loop
-	RunService.RenderStepped:Connect(function(deltaTime)
-		local fps = math.floor(1 / deltaTime)
-		InfoText.Text = "Jobware | " .. GameName .. " | FPS: " .. tostring(fps)
+	RunService.RenderStepped:Connect(function(dt)
+		InfoText.Text = "Jobware | " .. GameName .. " | FPS: " .. math.floor(1/dt)
 		InfoBar.Size = UDim2.new(0, InfoText.TextBounds.X + 20, 0, 26)
 	end)
 
-	-- [[ 3. MAIN FRAME ]] --
+	-- [[ MAIN WINDOW ]]
 	local MainFrame = Instance.new("Frame")
-	MainFrame.Size = UDim2.new(0.85, 0, 0.92, 0) 
+	MainFrame.Size = UDim2.new(0.85, 0, 0.92, 0)
 	MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	MainFrame.BackgroundColor3 = Theme.MainBg
@@ -143,7 +140,6 @@ function JobwareLib:CreateWindow(config)
 	
 	ToggleBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 
-	-- Sidebar
 	local Sidebar = Instance.new("Frame")
 	Sidebar.Size = UDim2.new(0.24, 0, 1, 0)
 	Sidebar.BackgroundColor3 = Theme.SidebarBg
@@ -157,7 +153,6 @@ function JobwareLib:CreateWindow(config)
 	SidebarLine.BorderSizePixel = 0
 	SidebarLine.Parent = Sidebar
 	
-	-- Header Name
 	local Logo = Instance.new("TextLabel")
 	Logo.Text = WinName
 	Logo.Size = UDim2.new(1, 0, 0, 40)
@@ -179,7 +174,6 @@ function JobwareLib:CreateWindow(config)
 	TabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	TabLayout.Parent = TabScroll
 	
-	-- Content
 	local Content = Instance.new("Frame")
 	Content.Size = UDim2.new(0.76, 0, 1, 0)
 	Content.Position = UDim2.new(0.24, 0, 0, 0)
@@ -204,7 +198,6 @@ function JobwareLib:CreateWindow(config)
 	local Library = {}
 	local Tabs = {}
 	
-	-- [[ CREATE TAB ]]
 	function Library:CreateTab(name)
 		local Tab = {}
 		local TabBtn = Instance.new("TextButton")
@@ -265,7 +258,6 @@ function JobwareLib:CreateWindow(config)
 			Ind.BackgroundTransparency = 0
 		end
 		
-		-- [[ CREATE SECTION ]]
 		function Tab:CreateSection(title)
 			local Section = {}
 			local SecFrame = Instance.new("Frame")
@@ -303,7 +295,7 @@ function JobwareLib:CreateWindow(config)
 			ItemPad.PaddingBottom = UDim.new(0, 8)
 			ItemPad.Parent = Items
 			
-			-- [[ COMPACT BUTTON ]]
+			-- BUTTON
 			function Section:AddButton(text, callback)
 				local Button = Instance.new("TextButton")
 				Button.Size = UDim2.new(0.96, 0, 0, 28)
@@ -324,7 +316,7 @@ function JobwareLib:CreateWindow(config)
 				end)
 			end
 			
-			-- [[ COMPACT TOGGLE ]]
+			-- TOGGLE
 			function Section:AddToggle(text, default, callback)
 				local Toggled = default or false
 				local ToggleBtn = Instance.new("TextButton")
@@ -362,7 +354,7 @@ function JobwareLib:CreateWindow(config)
 				end)
 			end
 			
-			-- [[ COMPACT SLIDER ]]
+			-- SLIDER
 			function Section:AddSlider(text, min, max, default, callback)
 				local val = default or min
 				local SliderFrame = Instance.new("Frame")
@@ -422,6 +414,97 @@ function JobwareLib:CreateWindow(config)
 				UserInputService.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=false end end)
 				UserInputService.InputChanged:Connect(function(i) if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then Update(i) end end)
 			end
+			
+			-- DROPDOWN (NEU!)
+			function Section:AddDropdown(text, list, default, callback)
+				local Dropdown = {}
+				local open = false
+				local selected = default or list[1]
+				
+				local DropFrame = Instance.new("Frame")
+				DropFrame.Size = UDim2.new(0.96, 0, 0, 32)
+				DropFrame.BackgroundColor3 = Theme.ElementBg
+				DropFrame.Parent = Items
+				AddCorner(DropFrame, 3)
+				AddStroke(DropFrame, Theme.Stroke, 1)
+				
+				local Label = Instance.new("TextLabel")
+				Label.Text = text .. ": " .. selected
+				Label.Size = UDim2.new(1, -25, 1, 0)
+				Label.Position = UDim2.new(0, 8, 0, 0)
+				Label.BackgroundTransparency = 1
+				Label.TextColor3 = Theme.Text
+				Label.Font = Theme.FontItem
+				Label.TextSize = 11
+				Label.TextXAlignment = Enum.TextXAlignment.Left
+				Label.Parent = DropFrame
+				
+				local Arrow = Instance.new("TextLabel")
+				Arrow.Text = "▼"
+				Arrow.Size = UDim2.new(0, 20, 1, 0)
+				Arrow.Position = UDim2.new(1, -20, 0, 0)
+				Arrow.BackgroundTransparency = 1
+				Arrow.TextColor3 = Theme.TextDim
+				Arrow.TextSize = 10
+				Arrow.Parent = DropFrame
+				
+				local Button = Instance.new("TextButton")
+				Button.Size = UDim2.new(1, 0, 1, 0)
+				Button.BackgroundTransparency = 1
+				Button.Text = ""
+				Button.Parent = DropFrame
+				
+				local ListFrame = Instance.new("Frame")
+				ListFrame.Size = UDim2.new(0.96, 0, 0, 0) -- Start height 0
+				ListFrame.BackgroundColor3 = Theme.ElementBg
+				ListFrame.Visible = false
+				ListFrame.Parent = Items
+				AddCorner(ListFrame, 3)
+				AddStroke(ListFrame, Theme.Stroke, 1)
+				
+				local ListLayout = Instance.new("UIListLayout")
+				ListLayout.Padding = UDim.new(0, 2)
+				ListLayout.Parent = ListFrame
+				
+				Button.MouseButton1Click:Connect(function()
+					open = not open
+					Arrow.Rotation = open and 180 or 0
+					ListFrame.Visible = open
+					
+					-- Clear old items
+					for _, v in pairs(ListFrame:GetChildren()) do
+						if v:IsA("TextButton") then v:Destroy() end
+					end
+					
+					if open then
+						for _, item in pairs(list) do
+							local ItemBtn = Instance.new("TextButton")
+							ItemBtn.Size = UDim2.new(1, 0, 0, 24)
+							ItemBtn.BackgroundColor3 = Theme.ElementBg
+							ItemBtn.BackgroundTransparency = 1
+							ItemBtn.Text = item
+							ItemBtn.TextColor3 = (item == selected) and Theme.Accent or Theme.Text
+							ItemBtn.Font = Theme.FontItem
+							ItemBtn.TextSize = 11
+							ItemBtn.Parent = ListFrame
+							
+							ItemBtn.MouseButton1Click:Connect(function()
+								selected = item
+								Label.Text = text .. ": " .. selected
+								open = false
+								ListFrame.Visible = false
+								Arrow.Rotation = 0
+								ListFrame.Size = UDim2.new(0.96, 0, 0, 0)
+								pcall(callback, item)
+							end)
+						end
+						ListFrame.Size = UDim2.new(0.96, 0, 0, #list * 26)
+					else
+						ListFrame.Size = UDim2.new(0.96, 0, 0, 0)
+					end
+				end)
+			end
+
 			return Section
 		end
 		return Tab
